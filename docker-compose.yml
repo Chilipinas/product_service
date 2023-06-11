@@ -1,0 +1,73 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:latest
+    restart: always
+    env_file:
+      - .env.example
+    networks:
+      - mynetwork
+  admin_panel:
+    build:
+      context: .
+      dockerfile: admin_panel/Dockerfile
+    environment:
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    restart: always
+    ports:
+      - 8000:8000
+    command: sh -c "sleep 5 && python main.py"  # Задержка в 5 секунд перед запуском
+    networks:
+      - mynetwork
+  etl_process:
+    build:
+      context: .
+      dockerfile: etl_process/Dockerfile
+    environment:
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - ELASTICSEARCH_HOST=${ELASTICSEARCH_HOST}
+      - ELASTICSEARCH_PORT=${ELASTICSEARCH_PORT}
+    command: sh -c "sleep 5 && python main.py"  # Задержка в 5 секунд перед запуском
+    networks:
+      - mynetwork
+  product_purchase_service:
+    build:
+      context: .
+      dockerfile: product_purchase_service/Dockerfile
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+    ports:
+      - 8001:8000
+    command: sh -c "sleep 5 && python main.py"  # Задержка в 5 секунд перед запуском
+    networks:
+      - mynetwork
+  product_search_service:
+    build:
+      context: .
+      dockerfile: product_search_service/Dockerfile
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      - ELASTICSEARCH_HOST=${ELASTICSEARCH_HOST}
+      - ELASTICSEARCH_PORT=${ELASTICSEARCH_PORT}
+    ports:
+      - 8002:8000
+    command: sh -c "sleep 5 && python main.py"  # Задержка в 5 секунд перед запуском
+    networks:
+      - mynetwork
+  elasticsearch:
+    image: elasticsearch:7.14.0
+    ports:
+      - 9200:9200
+    networks:
+      - mynetwork
+networks:
+  mynetwork:
+    driver: bridge
