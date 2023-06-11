@@ -15,9 +15,6 @@ Base.metadata.create_all(bind=engine)
 class ProductSearch(BaseModel):
     query: str
 
-@app.get("/")
-def read_root():
-    return {"Hello": "Product Search Service"}
 
 # API endpoint to search products by name or description
 @app.get("/products")

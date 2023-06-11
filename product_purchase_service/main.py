@@ -17,9 +17,6 @@ class ProductPurchase(BaseModel):
     product_id: int
     quantity: int
 
-@app.get("/")
-def read_root():
-    return {"Hello": "Product Purchase Service"}
 
 # API endpoints for product purchase service
 @app.get("/products/{product_id}")
