@@ -14,7 +14,7 @@ class ProductCreateUpdate(BaseModel):
 def get_db_connection():
     connection = psycopg2.connect(
         host="POSTGRES_HOST",
-        port=5432,
+        port="POSTGRES_PORT",
         dbname="POSTGRES_DB",
         user="POSTGRES_USER",
         password="POSTGRES_PASSWORD"
